@@ -1216,7 +1216,7 @@ const ContentPage = ({ data }) => {
               className: "px-5 py-2.5 bg-slate-900 text-white rounded-xl text-sm font-medium hover:shadow-lg transition-all flex items-center gap-2 hover-lift",
               onClick: () => setShowReportMenu(!showReportMenu)
             },
-              "查看研究报告",
+              "论文列表",
               React.createElement(Icons.ChevronDown, { size: 16 })
             ),
             showReportMenu && React.createElement('div', { className: "absolute top-full left-0 mt-2 w-80 bg-white rounded-xl shadow-xl border border-slate-200 z-50" },
@@ -1237,9 +1237,6 @@ const ContentPage = ({ data }) => {
                 ))
               )
             )
-          ),
-          React.createElement('button', { className: "p-2.5 bg-white border border-slate-200 rounded-xl text-slate-500 hover:text-slate-700 hover:border-slate-300 transition-all hover-lift" },
-            React.createElement(Icons.Share2, { size: 18 })
           )
         )
       ),
