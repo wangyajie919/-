@@ -1,0 +1,1338 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>万木更生 - 生物木质素实验室</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'sans-serif'] },
+          colors: {
+            primary: '#0F766E',
+            secondary: '#14B8A6',
+            accent: '#06B6D4',
+          },
+        },
+      }
+    }
+  </script>
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .content-auto { content-visibility: auto; }
+      .text-shadow-sm { text-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+      .hover-lift { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+      .hover-lift:hover { transform: translateY(-2px); }
+    }
+    body {
+      background-image: url('ppt网页图/ppt网页图/背景图.png');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      position: relative;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(255, 255, 255, 0.45);
+      z-index: -1;
+    }
+    /* Content card readability enhancement */
+    .content-card {
+      position: relative;
+      padding: 32px;
+      border-radius: 24px;
+      border: 1px solid rgba(255, 255, 255, 0.45);
+      background: rgba(255, 255, 255, 0.48);
+      backdrop-filter: blur(8px);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+    
+    @media (max-width: 768px) {
+      .content-card {
+        padding: 24px;
+        border-radius: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script>
+/* ============================================
+   ICONS - SVG Icon Components
+   ============================================ */
+const Icons = {
+  Search: (props) => React.createElement('svg', { xmlns: "http://www.w3.org/2000/svg", width: props.size||20, height: props.size||20, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+    React.createElement('circle', { cx: "11", cy: "11", r: "8" }),
+    React.createElement('line', { x1: "21", y1: "21", x2: "16.65", y2: "16.65" })
+  ),
+  X: (props) => React.createElement('svg', { xmlns: "http://www.w3.org/2000/svg", width: props.size||20, height: props.size||20, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+    React.createElement('path', { d: "M18 6 6 18" }), React.createElement('path', { d: "m6 6 12 12" })
+  ),
+  Zap: (props) => React.createElement('svg', { xmlns: "http://www.w3.org/2000/svg", width: props.size||20, height: props.size||20, viewBox: "0 0 24 24", fill: props.fill||"none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+    React.createElement('path', { d: "M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.9 6.9A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.9-6.9A1 1 0 0 0 11 14z" })
+  ),
+  ImageIcon: (props) => React.createElement('svg', { xmlns: "http://www.w3.org/2000/svg", width: props.size||32, height: props.size||32, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+    React.createElement('rect', { x: "3", y: "3", width: "18", height: "18", rx: "2", ry: "2" }),
+    React.createElement('circle', { cx: "8.5", cy: "8.5", r: "1.5" }),
+    React.createElement('path', { d: "m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" })
+  ),
+  Maximize2: (props) => React.createElement('svg', { xmlns: "http://www.w3.org/2000/svg", width: props.size||18, height: props.size||18, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+    React.createElement('polyline', { points: "15 3 21 3 21 9" }), React.createElement('polyline', { points: "9 21 3 21 3 15" }),
+    React.createElement('line', { x1: "21", y1: "3", x2: "14", y2: "10" }), React.createElement('line', { x1: "3", y1: "21", x2: "10", y2: "14" })
+  ),
+  LayoutGrid: (props) => React.createElement('svg', { xmlns: "http://www.w3.org/2000/svg", width: props.size||20, height: props.size||20, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+    React.createElement('rect', { x: "3", y: "3", width: "7", height: "7" }), React.createElement('rect', { x: "14", y: "3", width: "7", height: "7" }),
+    React.createElement('rect', { x: "14", y: "14", width: "7", height: "7" }), React.createElement('rect', { x: "3", y: "14", width: "7", height: "7" })
+  ),
+  CheckCircle2: (props) => React.createElement('svg', { xmlns: "http://www.w3.org/2000/svg", width: props.size||18, height: props.size||18, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+    React.createElement('circle', { cx: "12", cy: "12", r: "10" }), React.createElement('path', { d: "m9 12 2 2 4-4" })
+  ),
+  Loader2: (props) => React.createElement('svg', { xmlns: "http://www.w3.org/2000/svg", width: props.size||18, height: props.size||18, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", className: props.className },
+    React.createElement('circle', { cx: "12", cy: "12", r: "10" }), React.createElement('path', { d: "M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" })
+  ),
+  Sparkles: (props) => React.createElement('svg', { xmlns: "http://www.w3.org/2000/svg", width: props.size||24, height: props.size||24, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+    React.createElement('path', { d: "M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z" }),
+    React.createElement('path', { d: "M20 2v4" }), React.createElement('path', { d: "M22 4h-4" })
+  ),
+  Share2: (props) => React.createElement('svg', { xmlns: "http://www.w3.org/2000/svg", width: props.size||18, height: props.size||18, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+    React.createElement('circle', { cx: "18", cy: "5", r: "3" }), React.createElement('circle', { cx: "6", cy: "12", r: "3" }), React.createElement('circle', { cx: "18", cy: "19", r: "3" }),
+    React.createElement('line', { x1: "8.59", y1: "13.51", x2: "15.42", y2: "17.49" }), React.createElement('line', { x1: "15.41", y1: "6.51", x2: "8.59", y2: "10.49" })
+  ),
+  Download: (props) => React.createElement('svg', { xmlns: "http://www.w3.org/2000/svg", width: props.size||18, height: props.size||18, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+    React.createElement('path', { d: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" }), React.createElement('polyline', { points: "7 10 12 15 17 10" }), React.createElement('line', { x1: "12", y1: "15", x2: "12", y2: "3" })
+  ),
+  ChevronDown: (props) => React.createElement('svg', { xmlns: "http://www.w3.org/2000/svg", width: props.size||16, height: props.size||16, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+    React.createElement('path', { d: "m6 9 6 6 6-6" })
+  ),
+  Plus: (props) => React.createElement('svg', { xmlns: "http://www.w3.org/2000/svg", width: props.size||16, height: props.size||16, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+    React.createElement('path', { d: "M5 12h14" }), React.createElement('path', { d: "M12 5v14" })
+  ),
+  ExternalLink: (props) => React.createElement('svg', { xmlns: "http://www.w3.org/2000/svg", width: props.size||14, height: props.size||14, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+    React.createElement('path', { d: "M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" }),
+    React.createElement('polyline', { points: "15 3 21 3 21 9" }), React.createElement('line', { x1: "10", y1: "14", x2: "21", y2: "3" })
+  ),
+  Clock: (props) => React.createElement('svg', { xmlns: "http://www.w3.org/2000/svg", width: props.size||14, height: props.size||14, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+    React.createElement('circle', { cx: "12", cy: "12", r: "10" }), React.createElement('polyline', { points: "12 6 12 12 16 14" })
+  ),
+  Layers: (props) => React.createElement('svg', { xmlns: "http://www.w3.org/2000/svg", width: props.size||20, height: props.size||20, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+    React.createElement('path', { d: "m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z" }),
+    React.createElement('path', { d: "m2 12 8.58 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12" }),
+    React.createElement('path', { d: "m2 17 8.58 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17" })
+  ),
+};
+
+/* ============================================
+   SMART IMAGE COMPONENT
+   Unified image handling with placeholder support
+   ============================================ */
+const ASPECT_RATIO_MAP = {
+  '16/9': 'aspect-video',
+  '4/3': 'aspect-[4/3]',
+  '1/1': 'aspect-square',
+  '3/4': 'aspect-[3/4]',
+  'auto': 'aspect-auto',
+  'wide': 'aspect-[21/9]',
+  'tall': 'aspect-[3/4]',
+};
+
+const SmartImage = ({
+  src,
+  alt = "科研图片",
+  ratio = "16/9",
+  label,
+  caption,
+  tag,
+  className = "",
+  onClick,
+  fit = "cover",
+}) => {
+  const [error, setError] = React.useState(false);
+  const [loading, setLoading] = React.useState(true);
+
+  const finalSrc = error || !src ? null : src;
+
+  const containerClass = `group relative overflow-hidden rounded-xl bg-gradient-to-br from-slate-50 to-slate-100 border border-slate-200 transition-all hover:shadow-lg hover:border-blue-200 ${ASPECT_RATIO_MAP[ratio] || 'aspect-video'} ${className}`;
+
+  const handleClick = () => onClick && onClick({ src, alt, label, caption, tag });
+
+  const objectFitClass = fit === "contain" ? "object-contain" : "object-cover";
+
+  return React.createElement('div', { className: containerClass, onClick: handleClick },
+    loading && finalSrc && React.createElement('div', { className: "absolute inset-0 flex items-center justify-center" },
+      React.createElement('div', { className: "w-8 h-8 border-2 border-slate-200 border-t-blue-400 rounded-full animate-spin" })
+    ),
+    finalSrc ? (
+      React.createElement('img', {
+        src: finalSrc,
+        alt: alt,
+        className: `w-full h-full ${objectFitClass} transition-transform duration-500 group-hover:scale-105 ${loading ? 'opacity-0' : 'opacity-100'}`,
+        onLoad: () => setLoading(false),
+        onError: () => { setError(true); setLoading(false); }
+      })
+    ) : (
+      React.createElement('div', { className: "absolute inset-0 flex flex-col items-center justify-center" },
+        React.createElement(Icons.ImageIcon, { size: ratio === '1/1' ? 40 : 48, className: "text-slate-300 mb-2" }),
+        label && React.createElement('span', { className: "text-xs text-slate-400 font-medium text-center px-4" }, label)
+      )
+    ),
+    tag && React.createElement('div', { className: "absolute top-3 left-3" },
+      React.createElement('span', { className: "bg-slate-900/80 text-white text-xs font-medium px-2.5 py-1 rounded-lg backdrop-blur-sm" }, tag)
+    ),
+    caption && React.createElement('div', { className: "absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4 pt-12" },
+      caption && React.createElement('p', { className: "text-white text-xs" }, caption)
+    ),
+    label && !finalSrc && React.createElement('div', { className: "absolute bottom-3 left-3 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-lg shadow-sm" },
+      React.createElement('span', { className: "text-xs font-medium text-slate-600" }, label)
+    )
+  );
+};
+
+/* ============================================
+   SECTION TYPE REGISTRY
+   Maps section types to their render functions
+   ============================================ */
+const SECTION_TYPES = {
+  figure: 'PptFigureSection',
+  comparison: 'ComparisonRow',
+  wall: 'ImageWall',
+  mosaic: 'MosaicGallery',
+  timeline: 'TimelineGallery',
+  card: 'ImageCard',
+  feature: 'FeatureShowcase',
+  tabbed: 'TabbedGallery',
+};
+
+/* ============================================
+   PptFigureSection
+   For: 工艺图、技术路线图、结构机理图、整页PPT核心图
+   ============================================ */
+const PptFigureSection = ({ id, title, subtitle, description, figureNumber, caption, points = [], images = [], layout = 'left-points', fit = "contain" }) => {
+  const mainImage = images[0] || {};
+  const hasMultipleImages = images.length > 1;
+
+  return React.createElement('div', { className: "mb-16" },
+    React.createElement('div', { className: "flex items-baseline justify-between mb-6" },
+      React.createElement('div', null,
+        figureNumber && React.createElement('span', { className: "text-xs font-medium text-slate-400 uppercase tracking-wide mb-1 block" }, figureNumber),
+        React.createElement('h3', { className: "text-xl font-semibold text-slate-900 text-shadow-sm" }, title),
+        subtitle && React.createElement('p', { className: "text-sm text-slate-500 mt-1" }, subtitle)
+      ),
+      React.createElement('span', { className: "text-xs font-medium text-slate-400 uppercase tracking-wide" }, "Technical Figure")
+    ),
+    React.createElement('div', { className: `grid gap-8 ${layout === 'left-points' ? 'lg:grid-cols-12' : 'grid-cols-1'}` },
+      layout === 'left-points' ? (
+        React.createElement(React.Fragment, null,
+          React.createElement('div', { className: "lg:col-span-8" },
+            hasMultipleImages ? (
+              React.createElement('div', { className: "grid grid-cols-2 gap-4" },
+                images.map((img, i) => React.createElement(SmartImage, { key: i, ...img, ratio: img.ratio || '16/9', fit: img.fit || fit }))
+              )
+            ) : (
+              React.createElement(SmartImage, { ...mainImage, ratio: mainImage.ratio || '16/9', fit: mainImage.fit || fit, className: "min-h-[400px] shadow-md" })
+            ),
+            caption && React.createElement('p', { className: "mt-4 text-sm text-slate-500 leading-relaxed italic border-l-2 border-slate-200 pl-4" }, caption)
+          ),
+          React.createElement('div', { className: "lg:col-span-4 flex flex-col justify-center space-y-3" },
+            points.map((point, i) => (
+              React.createElement('div', { key: i, className: "p-4 bg-white rounded-xl border border-slate-100 shadow-sm flex items-start gap-3 hover:border-blue-200 transition-all hover-lift" },
+                React.createElement(Icons.CheckCircle2, { className: "text-blue-500 mt-0.5 shrink-0" }),
+                React.createElement('span', { className: "text-base text-slate-700 font-medium" }, point)
+              )
+            ))
+          )
+        )
+      ) : (
+        React.createElement(React.Fragment, null,
+          caption && React.createElement('p', { className: "mb-4 text-sm text-slate-500 leading-relaxed" }, caption),
+          React.createElement('div', { className: hasMultipleImages ? "grid grid-cols-2 lg:grid-cols-3 gap-4" : "grid grid-cols-1" },
+            images.map((img, i) => React.createElement(SmartImage, { key: i, ...img, ratio: img.ratio || (hasMultipleImages ? '4/3' : '16/9'), fit: img.fit || fit, className: "shadow-sm" }))
+          ),
+          points.length > 0 && React.createElement('div', { className: "mt-6 grid grid-cols-2 md:grid-cols-3 gap-3 justify-items-center" },
+            points.map((point, i) => (
+              React.createElement('div', { key: i, className: "p-3 bg-white rounded-lg border border-slate-100 text-base text-slate-700 hover:shadow-sm transition-all text-center" }, point)
+            ))
+          )
+        )
+      )
+    )
+  );
+};
+
+/* ============================================
+   ComparisonRow
+   For: 2~4张图平行展示，日光/UV/熄灯，光学测试对比
+   ============================================ */
+const ComparisonRow = ({ id, title, subtitle, description, images = [], caption, columns, fit = "cover" }) => {
+  const colCount = columns || images.length || 2;
+  
+  return React.createElement('div', { className: "mb-16" },
+    (title || subtitle || description) && React.createElement('div', { className: "mb-6" },
+      title && React.createElement('h3', { className: "text-xl font-semibold text-slate-900 text-shadow-sm" }, title),
+      subtitle && React.createElement('p', { className: "text-base text-slate-500 mt-1" }, subtitle),
+      description && React.createElement('p', { className: "text-sm text-slate-400 mt-2" }, description)
+    ),
+    React.createElement('div', { className: `grid gap-6 ${colCount === 2 ? 'md:grid-cols-2' : colCount === 3 ? 'md:grid-cols-3' : 'md:grid-cols-2 lg:grid-cols-4'}` },
+      images.map((img, i) => (
+        React.createElement('div', { key: img.id || i, className: "space-y-3 hover-lift" },
+          React.createElement(SmartImage, { ...img, ratio: img.ratio || '4/3', fit: img.fit || fit, className: "w-full" }),
+          img.label && React.createElement('div', { className: "text-center" },
+            React.createElement('span', { className: "text-sm font-medium text-slate-700" }, img.label)
+          )
+        )
+      ))
+    ),
+    caption && React.createElement('p', { className: "mt-6 text-sm text-slate-400 text-center" }, caption)
+  );
+};
+
+/* ============================================
+   ImageWall
+   For: 应用场景图墙、成品图墙、多图平铺展示
+   ============================================ */
+const ImageWall = ({ id, title, subtitle, images = [], caption, columns = 4, fit = "cover" }) => {
+  const colClass = columns === 2 ? 'grid-cols-2' : columns === 3 ? 'grid-cols-2 md:grid-cols-3' : 'grid-cols-2 md:grid-cols-4';
+  
+  return React.createElement('div', { className: "mb-16" },
+    (title || subtitle) && React.createElement('div', { className: "flex items-center gap-2 mb-6" },
+      React.createElement(Icons.LayoutGrid, { size: 20, className: "text-slate-700" }),
+      React.createElement('div', null,
+        title && React.createElement('h3', { className: "text-xl font-semibold text-slate-900 text-shadow-sm" }, title),
+        subtitle && React.createElement('p', { className: "text-sm text-slate-500" }, subtitle)
+      )
+    ),
+    React.createElement('div', { className: `grid ${colClass} gap-4` },
+      images.map((img, i) => (
+        React.createElement('div', { key: img.id || i, className: "space-y-2 hover-lift" },
+          React.createElement(SmartImage, { ...img, ratio: img.ratio || '1/1', fit: img.fit || fit, className: "aspect-square shadow-sm" }),
+          img.label && React.createElement('div', { className: "flex justify-between items-center px-1" },
+            React.createElement('span', { className: "text-xs font-medium text-slate-600 truncate" }, img.label),
+            img.tag && React.createElement('span', { className: "text-xs bg-slate-100 px-2 py-0.5 rounded text-slate-400 shrink-0" }, img.tag)
+          )
+        )
+      ))
+    ),
+    caption && React.createElement('p', { className: "mt-5 text-sm text-slate-400 text-center" }, caption)
+  );
+};
+
+/* ============================================
+   MosaicGallery
+   For: 1大2小拼图，主图+细节图+结构图
+   ============================================ */
+const MosaicGallery = ({ id, title, subtitle, images = [], caption }) => {
+  const [primary, ...secondary] = images;
+  
+  return React.createElement('div', { className: "mb-16" },
+    (title || subtitle) && React.createElement('div', { className: "mb-6" },
+      title && React.createElement('h3', { className: "text-xl font-semibold text-slate-900 text-shadow-sm" }, title),
+      subtitle && React.createElement('p', { className: "text-sm text-slate-500 mt-1" }, subtitle)
+    ),
+    React.createElement('div', { className: "grid grid-cols-1 lg:grid-cols-2 gap-5 h-[500px]" },
+      primary && React.createElement(SmartImage, { ...primary, ratio: primary.ratio || '4/3', className: "h-full shadow-md" }),
+      React.createElement('div', { className: "grid grid-rows-2 gap-5" },
+        secondary.slice(0, 2).map((img, i) => (
+          React.createElement(SmartImage, { key: i, ...img, ratio: img.ratio || '16/9', className: "h-full shadow-sm" })
+        ))
+      )
+    ),
+    caption && React.createElement('p', { className: "mt-5 text-sm text-slate-400" }, caption)
+  );
+};
+
+/* ============================================
+   TimelineGallery
+   For: 降解过程、阶段演进、实验时间节点
+   ============================================ */
+const TimelineGallery = ({ id, title, subtitle, description, steps = [], caption, images = [] }) => {
+  const timelineImages = images.length > 0 ? images : steps.map((step, i) => ({
+    src: `fig/day${i + 1}.png`,
+    alt: step.label || step.title || `阶段${i + 1}`,
+    label: step.title || step,
+    tag: step.tag || (i + 1).toString(),
+  }));
+
+  return React.createElement('div', { className: "mb-16" },
+    (title || subtitle) && React.createElement('div', { className: "mb-6" },
+      title && React.createElement('h3', { className: "text-xl font-semibold text-slate-900 text-shadow-sm" }, title),
+      subtitle && React.createElement('p', { className: "text-base text-slate-500 mt-1" }, subtitle),
+      description && React.createElement('p', { className: "text-sm text-slate-400 mt-2" }, description)
+    ),
+    React.createElement('div', { className: "overflow-x-auto pb-4 -mx-4 px-4" },
+      React.createElement('div', { className: "flex gap-4 min-w-max" },
+        timelineImages.map((img, i) => (
+          React.createElement('div', { key: img.id || i, className: "w-64 shrink-0 hover-lift" },
+            React.createElement(SmartImage, { ...img, ratio: img.ratio || '1/1', className: "aspect-square shadow-sm" }),
+            React.createElement('div', { className: "flex items-center gap-2 mt-3 px-1" },
+              React.createElement('div', { className: "w-2 h-2 rounded-full bg-blue-500 shrink-0" }),
+              React.createElement('span', { className: "text-sm font-medium text-slate-700" }, img.label || img.alt)
+            )
+          )
+        ))
+      )
+    ),
+    caption && React.createElement('p', { className: "mt-6 text-sm text-slate-400 text-center" }, caption)
+  );
+};
+
+/* ============================================
+   ImageCard
+   For: 标准单图卡片，可复用
+   ============================================ */
+const ImageCard = ({ id, src, alt, title, subtitle, label, caption, tag, ratio = '16/9', actions = [] }) => {
+  return React.createElement('div', { className: "bg-white rounded-xl border border-slate-200 overflow-hidden hover:shadow-lg transition-all group" },
+    React.createElement(SmartImage, { src, alt, label, caption, tag, ratio, className: "aspect-video" }),
+    (title || subtitle) && React.createElement('div', { className: "p-4" },
+      title && React.createElement('h4', { className: "text-sm font-semibold text-slate-900" }, title),
+      subtitle && React.createElement('p', { className: "text-xs text-slate-500 mt-1" }, subtitle)
+    ),
+    actions.length > 0 && React.createElement('div', { className: "px-4 pb-4 flex gap-2" },
+      actions.map((action, i) => (
+        React.createElement('button', { key: i, onClick: action.onClick, className: "text-xs text-blue-600 hover:text-blue-800 font-medium" }, action.label)
+      ))
+    )
+  );
+};
+
+/* ============================================
+   FeatureShowcase
+   For: 左侧大图 + 右侧多图 + 文本说明
+   ============================================ */
+const FeatureShowcase = ({ id, title, subtitle, description, heroImage, features = [], images = [], layout = 'left' }) => {
+  const isLeft = layout === 'left';
+  
+  return React.createElement('div', { className: "mb-16" },
+    (title || subtitle) && React.createElement('div', { className: "mb-8" },
+      title && React.createElement('h3', { className: "text-xl font-semibold text-slate-900 text-shadow-sm" }, title),
+      subtitle && React.createElement('p', { className: "text-base text-slate-500 mt-1" }, subtitle),
+      description && React.createElement('p', { className: "text-sm text-slate-400 mt-2" }, description)
+    ),
+    React.createElement('div', { className: `grid gap-8 lg:grid-cols-12 ${isLeft ? '' : 'lg:flex-row-reverse'}` },
+      heroImage && React.createElement('div', { className: isLeft ? 'lg:col-span-7' : 'lg:col-span-7 lg:order-2' },
+        React.createElement(SmartImage, { ...heroImage, ratio: heroImage.ratio || '16/9', className: "min-h-[350px] shadow-md" })
+      ),
+      React.createElement('div', { className: `${isLeft ? 'lg:col-span-5' : 'lg:col-span-5 lg:order-1'} space-y-6` },
+        features.length > 0 && React.createElement('div', { className: "space-y-4" },
+          features.map((feature, i) => (
+            React.createElement('div', { key: i, className: "flex gap-4 p-4 bg-slate-50 rounded-xl hover:shadow-sm transition-all hover-lift" },
+              feature.icon && React.createElement('div', { className: "w-10 h-10 bg-white rounded-lg flex items-center justify-center shrink-0 shadow-sm" },
+                React.createElement(Icons.CheckCircle2, { className: "text-blue-500", size: 20 })
+              ),
+              React.createElement('div', null,
+                feature.title && React.createElement('h4', { className: "text-sm font-semibold text-slate-900" }, feature.title),
+                feature.description && React.createElement('p', { className: "text-xs text-slate-500 mt-0.5" }, feature.description)
+              )
+            )
+          ))
+        ),
+        images.length > 0 && React.createElement('div', { className: "grid grid-cols-3 gap-3" },
+          images.map((img, i) => React.createElement(SmartImage, { key: i, ...img, ratio: img.ratio || '1/1', className: "aspect-square shadow-sm" }))
+        )
+      )
+    )
+  );
+};
+
+/* ============================================
+   TabbedGallery
+   For: 图片很多时分
+组切换
+   ============================================ */
+const TabbedGallery = ({ id, title, subtitle, tabs = [], activeTab: controlledActiveTab, onTabChange }) => {
+  const [internalActiveTab, setInternalActiveTab] = React.useState(0);
+  const activeTab = controlledActiveTab !== undefined ? controlledActiveTab : internalActiveTab;
+  const setActiveTab = onTabChange || setInternalActiveTab;
+  const currentData = tabs[activeTab] || {};
+
+  return React.createElement('div', { className: "mb-16" },
+    (title || subtitle) && React.createElement('div', { className: "mb-6" },
+      title && React.createElement('h3', { className: "text-xl font-semibold text-slate-900 text-shadow-sm" }, title),
+      subtitle && React.createElement('p', { className: "text-sm text-slate-500 mt-1" }, subtitle)
+    ),
+    React.createElement('div', { className: "bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm" },
+      React.createElement('div', { className: "flex border-b border-slate-200 overflow-x-auto" },
+        tabs.map((tab, i) => (
+          React.createElement('button', {
+            key: tab.id || i,
+            onClick: () => setActiveTab(i),
+            className: `px-6 py-3 text-sm font-medium whitespace-nowrap transition-all ${activeTab === i ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50' : 'text-slate-500 hover:text-slate-700'}`
+          }, tab.label || tab.title || `Tab ${i + 1}`)
+        ))
+      ),
+      React.createElement('div', { className: "p-6" },
+        currentData.description && React.createElement('p', { className: "text-sm text-slate-500 mb-4" }, currentData.description),
+        currentData.images && React.createElement('div', { className: `grid gap-4 ${currentData.images.length === 1 ? 'grid-cols-1' : currentData.images.length === 2 ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-3'}` },
+          currentData.images.map((img, i) => React.createElement(SmartImage, { key: i, ...img, ratio: img.ratio || '16/9', className: "shadow-sm" }))
+        ),
+        currentData.caption && React.createElement('p', { className: "mt-4 text-xs text-slate-400 text-center" }, currentData.caption)
+      )
+    )
+  );
+};
+
+/* ============================================
+   SECTION RENDERER
+   Routes to appropriate component based on type
+   ============================================ */
+const SectionRenderer = ({ section }) => {
+  const props = {
+    key: section.id || section.type,
+    id: section.id,
+    title: section.title,
+    subtitle: section.subtitle,
+    description: section.description,
+    figureNumber: section.figureNumber,
+    caption: section.caption,
+    points: section.points || [],
+    images: section.images || [],
+    columns: section.columns,
+    layout: section.layout,
+    steps: section.steps,
+    tabs: section.tabs,
+    fit: section.fit || "contain",
+  };
+
+  switch (section.type) {
+    case 'figure':
+      return React.createElement(PptFigureSection, props);
+    case 'comparison':
+      return React.createElement(ComparisonRow, props);
+    case 'wall':
+      return React.createElement(ImageWall, props);
+    case 'mosaic':
+      return React.createElement(MosaicGallery, props);
+    case 'timeline':
+      return React.createElement(TimelineGallery, props);
+    case 'card':
+      return React.createElement(ImageCard, props);
+    case 'feature':
+      return React.createElement(FeatureShowcase, props);
+    case 'tabbed':
+      return React.createElement(TabbedGallery, props);
+    default:
+      return React.createElement('div', { className: "p-8 bg-yellow-50 rounded-xl border border-yellow-200 text-sm text-yellow-700" },
+        `Unknown section type: ${section.type}`
+      );
+  }
+};
+
+/* ============================================
+   PAGE CONFIGURATION
+   Standardized structure for all generation pages
+   ============================================ */
+const PAGE_CONFIG = {
+  gen1: {
+    id: 'gen1',
+    title: '一代：大众塑料替代方案',
+    subtitle: 'Scalable, Strong and Water-stable Wood Bioplastic',
+    theme: { text: 'text-green-600', bg: 'bg-green-50', border: 'border-green-200' },
+    keywords: ['降解', '木质素', '塑料替代', '环保', 'NR乳胶', '全生物质'],
+    hero: {
+      title: '一代：大众塑料替代方案',
+      subtitle: 'Scalable, Strong and Water-stable Wood Bioplastic',
+      description: '基于脱木素及NR乳胶原位再分布技术，突破生物质材料怕水、易碎的行业痛点。',
+      tag: 'Main Product',
+      images: [
+        { src: 'ppt网页图/ppt网页图/吸管.jpg', alt: '吸管', label: '吸管', tag: 'Main Product', ratio: '16/9', fit: 'contain' },
+        { src: 'ppt网页图/ppt网页图/包装袋.jpg', alt: '包装袋', label: '包装袋', tag: 'Main Product', ratio: '4/3', fit: 'cover' },
+        { src: 'ppt网页图/ppt网页图/材料杯.jpg', alt: '材料杯', label: '材料杯', tag: 'Main Product', ratio: '4/3', fit: 'cover' },
+        { src: 'ppt网页图/ppt网页图/餐盒.jpg', alt: '餐盒', label: '餐盒', tag: 'Main Product', ratio: '4/3', fit: 'cover' },
+      ],
+    },
+    sections: [
+      {
+        id: 'process',
+        type: 'figure',
+        title: '三步法原位渗透工艺',
+        subtitle: 'Manufacturing Process',
+        figureNumber: 'Figure 1',
+        caption: '制造流程示意图。包括(a)脱木素处理，(b)NR乳胶原位渗透，(c)热压致密化与硫化。',
+        layout: 'left-points',
+        fit: 'contain',
+        images: [
+          { src: 'ppt网页图/ppt网页图/工艺流程图2.jpg', alt: '工艺流程图', label: '工艺流程图', tag: 'Process', ratio: '16/9', fit: 'contain' },
+        ],
+        points: [
+          '环境友好型化学处理',
+          '机械性能提升10倍',
+          '全生物质原料',
+        ],
+      },
+      {
+        id: 'tech-details',
+        type: 'figure',
+        title: '补充技术图区',
+        subtitle: 'Technical Details',
+        layout: 'bottom-points',
+        fit: 'contain',
+        images: [
+          { src: 'ppt网页图/ppt网页图/流程图.JPG', alt: '技术流程图', label: '技术流程图', tag: 'Flowchart', ratio: '16/9', fit: 'contain' },
+          { src: 'ppt网页图/ppt网页图/流程图1.jpg', alt: '工艺流程图', label: '工艺流程图', tag: 'Process', ratio: '16/9', fit: 'contain' },
+          { src: 'ppt网页图/ppt网页图/天然胶乳复合.JPG', alt: '天然胶乳复合', label: '天然胶乳复合', tag: 'Composite', ratio: '16/9', fit: 'contain' },
+        ],
+        points: [
+          '天然胶乳复合技术',
+          '高效脱木素工艺',
+          '全生物质原料体系',
+        ],
+      },
+      {
+        id: 'degradation',
+        type: 'timeline',
+        title: '自然环境降解演进',
+        subtitle: 'Degradation Process',
+        description: '材料在真实土壤环境中的降解过程，180天可实现接近100%矿化。',
+        steps: [
+          { title: 'Day 1', tag: '1' },
+          { title: 'Week 3', tag: '2' },
+          { title: 'Week 5', tag: '3' },
+          { title: '自然环境中分解示意图', tag: '4' },
+        ],
+        images: [
+          { src: 'ppt网页图/ppt网页图/day1.jpg', alt: 'Day 1', label: 'Day 1', ratio: '4/3', fit: 'cover' },
+          { src: 'ppt网页图/ppt网页图/week3.jpg', alt: 'Week 3', label: 'Week 3', ratio: '4/3', fit: 'cover' },
+          { src: 'ppt网页图/ppt网页图/week5.jpg', alt: 'Week 5', label: 'Week 5', ratio: '4/3', fit: 'cover' },
+          { src: 'ppt网页图/ppt网页图/180day.png', alt: '自然环境中分解示意图', label: '自然环境中分解示意图', ratio: '4/3', fit: 'cover' },
+        ],
+        caption: '材料在真实土壤环境中的降解过程，180天可实现接近100%矿化。',
+      },
+
+    ],
+  },
+  gen2: {
+    id: 'gen2',
+    title: '二代：柔性电子衬底',
+    subtitle: 'Transparent, Isotropic and Flexible Wood Substrate',
+    theme: { text: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-200' },
+    keywords: ['透明', '柔性', '电子衬底', '氧化还原', '交叉层压', '各向同性'],
+    hero: {
+      title: '二代：柔性电子衬底',
+      subtitle: 'Transparent, Isotropic and Flexible Wood Substrate',
+      description: '氧化-还原改性技术赋予木材透明性，交叉层压技术消除各向异性，打造高性能电子皮肤衬底。',
+      tag: 'Optical Property',
+      images: [
+        { src: 'ppt网页图/电子元器件.jpg', alt: '电子元器件', label: '电子元器件', tag: 'Electronics', ratio: '4/3', fit: 'cover' },
+        { src: 'ppt网页图/电子元器件2.png', alt: '电子元器件2', label: '电子元器件2', tag: 'Electronics', ratio: '4/3', fit: 'cover' },
+      ],
+    },
+    sections: [
+      {
+        id: 'optical-tests',
+        type: 'comparison',
+        title: '光学与柔性对比测试',
+        subtitle: 'Optical & Flexibility Tests',
+        description: '对比展示：透光率 >70%，雾度约90%，且具备优异的耐弯折疲劳性能。',
+        columns: 3,
+        fit: 'contain',
+        images: [
+          { src: 'ppt网页图/ppt网页图/高透明.jpg', alt: '高透明度展示', label: '高透明度展示', tag: 'Transparency', ratio: '4/3', fit: 'contain' },
+          { src: 'ppt网页图/ppt网页图/雾度.jpg', alt: '雾度测试', label: '雾度测试', tag: 'Haze', ratio: '4/3', fit: 'contain' },
+          { src: 'ppt网页图/ppt网页图/挽着360.png', alt: '360° 弯折测试', label: '360° 弯折测试', tag: 'Flexibility', ratio: '4/3', fit: 'contain' },
+        ],
+        caption: '对比展示：透光率 >70%，雾度约90%，且具备优异的耐弯折疲劳性能。',
+      },
+      {
+        id: 'structure',
+        type: 'wall',
+        title: '微观结构与层压机理',
+        subtitle: 'Microstructure & Lamination',
+        description: '详细展示材料的微观结构、层压工艺和界面特性。',
+        columns: 3,
+        fit: 'contain',
+        images: [
+          { src: 'ppt网页图/ppt网页图/层压.JPG', alt: '层压示意', label: '层压示意', tag: 'Lamination', ratio: '4/3', fit: 'contain' },
+          { src: 'ppt网页图/ppt网页图/层压立体.JPG', alt: '层压立体', label: '层压立体', tag: '3D', ratio: '4/3', fit: 'contain' },
+          { src: 'ppt网页图/ppt网页图/层压sem2.JPG', alt: 'SEM微观细节', label: 'SEM 微观细节', tag: 'Detail', ratio: '4/3', fit: 'contain' },
+        ],
+        caption: '展示了材料的微观结构、层压工艺和界面特性，揭示了其优异性能的内在机制。',
+      },
+      {
+        id: 'interface',
+        type: 'figure',
+        title: '自黏附界面分析',
+        subtitle: 'Interface Analysis',
+        caption: '自黏附界面的微观结构分析，展示了天然橡胶乳胶与木材纤维的紧密结合。',
+        layout: 'left-points',
+        fit: 'contain',
+        images: [
+          { src: 'ppt网页图/ppt网页图/自粘附界面.JPG', alt: '界面分析', label: '界面分析', tag: 'Interface', ratio: '16/9', fit: 'contain' },
+        ],
+        points: [
+          '天然橡胶乳胶自黏附',
+          '0/90°交叉层压结构',
+          '高强度界面结合',
+        ],
+      },
+
+    ],
+  },
+  gen3: {
+    id: 'gen3',
+    title: '三代：室温磷光防伪',
+    subtitle: 'Room Temperature Phosphorescence (RTP) Security',
+    theme: { text: 'text-indigo-600', bg: 'bg-indigo-50', border: 'border-indigo-200' },
+    keywords: ['磷光', '防伪', '室温', '余辉', '三态', '信息安全'],
+    hero: {
+      title: '三代：室温磷光防伪',
+      subtitle: 'Room Temperature Phosphorescence (RTP) Security',
+      description: '利用木质纤维素天然微环境稳定三线态激子，实现超长寿命长余辉显示。',
+      tag: 'Security',
+      images: [
+        { src: 'ppt网页图/ppt网页图/防伪材料.JPG', alt: '防伪成品展示', label: '防伪成品展示', tag: 'Security', ratio: '21/9', fit: 'contain' },
+      ],
+    },
+    sections: [
+      {
+        id: 'triple-state',
+        type: 'comparison',
+        title: '三态防伪效果实拍',
+        subtitle: 'Triple-State Security Effect',
+        description: '通过精确控制木材组分，实现了肉眼可见的长余辉现象，有效防范非法复制。',
+        columns: 3,
+        fit: 'contain',
+        images: [
+          { src: 'ppt网页图/ppt网页图/日光.JPG', alt: '日光', label: 'Daylight (日光)', tag: 'Daylight', ratio: '4/3', fit: 'contain' },
+          { src: 'ppt网页图/ppt网页图/激发态.JPG', alt: '激发态', label: 'UV On (激发态)', tag: 'UV', ratio: '4/3', fit: 'contain' },
+          { src: 'ppt网页图/ppt网页图/熄灯.JPG', alt: '熄灯后', label: 'Afterglow (熄灯后)', tag: 'Glow', ratio: '4/3', fit: 'contain' },
+        ],
+        caption: '通过精确控制木材组分，实现了肉眼可见的长余辉现象，有效防范非法复制。',
+      },
+      {
+        id: 'details',
+        type: 'figure',
+        title: '图案与应用区',
+        subtitle: 'Patterns & Applications',
+        layout: 'bottom-points',
+        fit: 'contain',
+        images: [
+          { src: 'ppt网页图/ppt网页图/防伪图案定制.JPG', alt: '定制防伪图案', label: '定制防伪图案', tag: 'Custom', ratio: '16/9', fit: 'contain' },
+        ],
+        points: [
+          '定制化防伪图案',
+          '高精度图案印刷',
+          '多种应用场景',
+        ],
+      },
+
+    ],
+  },
+};
+
+/* ============================================
+   RESEARCH PAPERS DATA
+   ============================================ */
+const RESEARCH_PAPERS = [
+  {
+    id: 'paper-1',
+    title: 'Scalable, strong and water-stable wood-der',
+    file: 'Chen 等 - 2022 - Scalable, strong and water-stable wood-der.pdf',
+    keywords: ['一代', '降解', '塑料替代'],
+  },
+  {
+    id: 'paper-2',
+    title: 'Self-Adhesive, Isotropic, and All-Wood Transparen',
+    file: 'Chen 等 - Self-Adhesive, Isotropic, and All-Wood Transparen.pdf',
+    keywords: ['二代', '透明', '柔性'],
+  },
+];
+
+/* ============================================
+   SEARCH DATA
+   ============================================ */
+const SEARCH_INDEX = [
+  { id: 'q1', q: '什么是脱木素技术？', a: '通过化学药剂（如亚氯酸钠）有选择性地去除木材中的木质素，保留完整的纤维素框架。', cat: '技术原理', keywords: ['脱木素', '木质素', '纤维素'] },
+  { id: 'q2', q: '二代衬底的透光率是多少？', a: '透光率约70%，雾度约90%，非常适合作为扩散板和电子显示背板。', cat: '光学性能', keywords: ['透光率', '透明度', '雾度', '二代'] },
+  { id: 'q3', q: '三代磷光防伪的寿命多久？', a: '室温磷光寿命可达342ms，其余辉肉眼清晰可见。', cat: '防伪指标', keywords: ['磷光', '寿命', '余辉', '三代'] },
+  { id: 'q4', q: 'NR乳胶是什么？', a: '天然橡胶（Natural Rubber）乳胶，是一种从橡胶树中提取的天然高分子材料，具有优异的弹性和黏附性。', cat: '材料科学', keywords: ['NR', '乳胶', '天然橡胶'] },
+  { id: 'q5', q: '材料的降解周期是多久？', a: '材料在180天内可实现接近100%矿化，全程可追踪、可控制。', cat: '环保特性', keywords: ['降解', '矿化', '环保'] },
+  { id: 'q6', q: '如何实现室温磷光？', a: '利用木质纤维素天然微环境稳定三线态激子，实现超长寿命长余辉显示，无需特殊设备即可肉眼观察。', cat: '技术原理', keywords: ['磷光', '室温', '三线态', '余辉'] },
+  { id: 'q7', q: '适用于哪些防伪场景？', a: '高端票据、名酒溯源、药品防伪、证件防伪等需要高安全等级的领域。', cat: '应用场景', keywords: ['防伪', '票据', '溯源', '药品'] },
+  { id: 'q8', q: '透明木材是如何制造的？', a: '通过氧化-还原改性技术处理木材，去除吸光成分同时保留纤维素框架，再经过透明树脂渗透和交叉层压而成。', cat: '制造工艺', keywords: ['透明木材', '氧化还原', '制造'] },
+];
+
+/* ============================================
+   AI PAGE DATA STRUCTURE
+   ============================================ */
+// 木基材料综合问答助手相关配置
+const RECOMMENDED_QUESTIONS = [
+  '一代材料的核心优势是什么？',
+  '二代为什么适合作为柔性电子衬底？',
+  '三代磷光防伪的原理是什么？',
+  '哪张图展示了界面分析？',
+  '木基材料可以应用在哪些场景？'
+];
+
+const QUESTION_CATEGORIES = [
+  '代际对比',
+  '工艺流程',
+  '性能分析',
+  '图片解释',
+  '应用场景',
+  '防伪机理'
+];
+
+/* ============================================
+   SEARCH OVERLAY COMPONENT
+   Enhanced command palette style
+   ============================================ */
+const SearchOverlay = ({ isOpen, onClose }) => {
+  const [query, setQuery] = React.useState('');
+  const [results, setResults] = React.useState([]);
+  const [selectedIndex, setSelectedIndex] = React.useState(0);
+
+  React.useEffect(() => {
+    if (!query.trim()) {
+      setResults([]);
+      setSelectedIndex(0);
+      return;
+    }
+
+    const q = query.toLowerCase().split(/\s+/);
+    const scored = SEARCH_INDEX.map(item => {
+      const text = `${item.q} ${item.a} ${item.cat} ${item.keywords?.join(' ') || ''}`.toLowerCase();
+      const score = q.reduce((acc, token) => acc + (text.includes(token) ? 1 : 0), 0);
+      return { ...item, score };
+    }).filter(item => item.score > 0).sort((a, b) => b.score - a.score);
+
+    setResults(scored);
+    setSelectedIndex(0);
+  }, [query]);
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setSelectedIndex(i => Math.min(i + 1, results.length - 1));
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setSelectedIndex(i => Math.max(i - 1, 0));
+    } else if (e.key === 'Enter' && results[selectedIndex]) {
+      setQuery(results[selectedIndex].q);
+    }
+  };
+
+  const RECOMMENDED_TAGS = ['降解', '力学', '防伪', '透明', '磷光', '工艺'];
+
+  if (!isOpen) return null;
+
+  return React.createElement('div', {
+    className: "fixed inset-0 z-[100] bg-slate-900/70 backdrop-blur-md flex items-start justify-center pt-24 px-4",
+    onClick: onClose
+  },
+    React.createElement('div', {
+      className: "w-full max-w-xl bg-white rounded-2xl shadow-2xl overflow-hidden",
+      onClick: e => e.stopPropagation()
+    },
+      React.createElement('div', { className: "p-5 border-b border-slate-100 flex items-center gap-3" },
+        React.createElement(Icons.Search, { size: 24, className: "text-slate-400 shrink-0" }),
+        React.createElement('input', {
+          autoFocus: true,
+          placeholder: '搜索关键词（如：降解、透明度、PPT示意图）...',
+          className: 'flex-1 outline-none text-lg text-slate-900 placeholder:text-slate-400',
+          value: query,
+          onChange: e => setQuery(e.target.value),
+          onKeyDown: handleKeyDown
+        }),
+        React.createElement('button', {
+          onClick: onClose,
+          className: 'p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-400'
+        }, React.createElement(Icons.X, { size: 24 }))
+      ),
+      React.createElement('div', { className: "max-h-[60vh] overflow-y-auto" },
+        query ? (
+          results.length > 0 ? (
+            React.createElement('div', { className: "p-2" },
+              results.map((item, i) => (
+                React.createElement('div', {
+                  key: item.id,
+                  onClick: () => setQuery(item.q),
+                  className: `p-4 rounded-xl cursor-pointer transition-all ${i === selectedIndex ? 'bg-blue-50 border border-blue-200' : 'hover:bg-slate-50'}` },
+                  React.createElement('span', { className: "text-sm font-semibold uppercase text-blue-600 tracking-wide" }, item.cat),
+                  React.createElement('h4', { className: "text-base font-semibold text-slate-900 mt-1" }, item.q),
+                  React.createElement('p', { className: "text-base text-slate-500 mt-1 leading-relaxed" }, item.a)
+                )
+              ))
+            )
+          ) : (
+            React.createElement('div', { className: "py-12 text-center text-slate-400" },
+              React.createElement('p', { className: "text-base" }, '未找到相关结果'),
+              React.createElement('p', { className: "text-sm mt-1" }, '尝试其他关键词')
+            )
+          )
+        ) : (
+          React.createElement('div', { className: "p-5" },
+            React.createElement('p', { className: "text-sm font-medium text-slate-400 uppercase tracking-wide mb-3" }, '推荐搜索'),
+            React.createElement('div', { className: "flex flex-wrap gap-2" },
+              RECOMMENDED_TAGS.map(tag => (
+                React.createElement('button', {
+                  key: tag,
+                  onClick: () => setQuery(tag),
+                  className: "px-4 py-2 bg-slate-100 rounded-full text-sm font-medium text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                }, `#${tag}`)
+              ))
+            ),
+            React.createElement('div', { className: "mt-6 pt-6 border-t border-slate-100" },
+              React.createElement('p', { className: "text-sm font-medium text-slate-400 uppercase tracking-wide mb-3" }, '快速访问')
+            ),
+          )
+        )
+      )
+    )
+  );
+};
+
+/* ============================================
+   AI PAGE - Gen4Page
+   Enhanced with proper data structure and state management
+   ============================================ */
+const Gen4Page = () => {
+  const [status, setStatus] = React.useState('idle'); // idle / thinking / answered / failed
+  const [question, setQuestion] = React.useState('');
+  const [answer, setAnswer] = React.useState('');
+  const [activeResult, setActiveResult] = React.useState(null);
+  const [history, setHistory] = React.useState([]);
+  const [sessionId, setSessionId] = React.useState('');
+  const [selectedCategory, setSelectedCategory] = React.useState('');
+
+  const RECOMMENDED_QUESTIONS = [
+    '一代材料的核心优势是什么？',
+    '二代为什么适合作为柔性电子衬底？',
+    '三代磷光防伪的原理是什么？',
+    '哪张图展示了界面分析？',
+    '木基材料可以应用在哪些场景？'
+  ];
+
+  const QUESTION_CATEGORIES = [
+    '代际对比',
+    '工艺流程',
+    '性能分析',
+    '图片解释',
+    '应用场景',
+    '防伪机理'
+  ];
+
+  // Mock 回答数据
+  const mockAnswers = {
+    '一代材料的核心优势是什么？': {
+      answer: '一代材料的核心优势包括：\n1. 全生物质原料：采用天然木材和橡胶乳胶，完全可生物降解\n2. 机械性能优异：经过脱木素和乳胶原位渗透处理，机械性能提升10倍\n3. 水稳定性好：突破了传统生物质材料怕水的痛点\n4. 环境友好：制造过程采用环境友好型化学处理\n5. 可规模化生产：适合大众塑料替代方案',
+      relatedGeneration: 'gen1',
+      relatedKeywords: ['降解', '木质素', '塑料替代', '环保'],
+      followups: ['一代和二代的区别是什么？', '一代材料的降解周期是多久？']
+    },
+    '二代为什么适合作为柔性电子衬底？': {
+      answer: '二代材料适合作为柔性电子衬底的原因：\n1. 高透明度：透光率 >70%，雾度约90%，适合作为显示面板\n2. 优异的柔性：经过交叉层压处理，具备360°弯折能力\n3. 各向同性：消除了木材的天然各向异性，性能更加均匀\n4. 自黏附界面：天然橡胶乳胶提供了良好的界面结合\n5. 生物相容性：作为生物基材料，与人体接触安全',
+      relatedGeneration: 'gen2',
+      relatedKeywords: ['透明', '柔性', '电子衬底', '氧化还原'],
+      followups: ['二代材料的制造工艺是什么？', '哪张图展示了二代的透明性能？']
+    },
+    '三代磷光防伪的原理是什么？': {
+      answer: '三代磷光防伪的原理：\n1. 利用木质纤维素天然微环境稳定三线态激子\n2. 实现超长寿命长余辉显示，室温磷光寿命可达342ms\n3. 三态防伪效果：日光下、UV激发下、熄灯后的不同表现\n4. 不可伪造性：基于木材天然纹理和磷光特性的组合\n5. 环境响应灵敏：对不同光源有不同的响应效果',
+      relatedGeneration: 'gen3',
+      relatedKeywords: ['磷光', '防伪', '室温', '余辉'],
+      followups: ['三代防伪材料的应用场景有哪些？', '如何检测三代材料的防伪效果？']
+    },
+    '哪张图展示了界面分析？': {
+      answer: '展示界面分析的图位于第二代材料的"自黏附界面分析"部分。这张图展示了天然橡胶乳胶与木材纤维的紧密结合，揭示了二代材料优异性能的内在机制。界面分析图显示了：\n1. 天然橡胶乳胶在木材纤维之间的分布\n2. 0/90°交叉层压结构\n3. 高强度的界面结合区域',
+      relatedGeneration: 'gen2',
+      relatedKeywords: ['界面分析', '层压', '自黏附'],
+      followups: ['界面分析的重要性是什么？', '如何改善界面结合强度？']
+    },
+    '木基材料可以应用在哪些场景？': {
+      answer: '木基材料的应用场景包括：\n1. 一代材料：大众塑料替代方案，如餐盒、水杯、包装袋等\n2. 二代材料：柔性电子衬底，如电子皮肤、柔性显示、可穿戴设备等\n3. 三代材料：防伪应用，如高端票据、名酒溯源、药品防伪、证件防伪等\n4. 其他潜在应用：建筑材料、包装材料、汽车内饰等\n木基材料凭借其可持续性和独特性能，在多个领域都有广阔的应用前景。',
+      relatedGeneration: 'all',
+      relatedKeywords: ['应用场景', '塑料替代', '电子衬底', '防伪'],
+      followups: ['不同代际材料的应用场景有何不同？', '木基材料与传统材料相比有哪些优势？']
+    }
+  };
+
+  const handleAskQuestion = async () => {
+    if (status === 'thinking' || !question.trim()) return;
+    
+    setStatus('thinking');
+    setActiveResult(null);
+    setAnswer('');
+
+    try {
+      // 调用真实的百炼应用 API
+      const response = await fetch('/api/chat-app', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          question: question,
+          sessionId: sessionId
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`API 调用失败: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      // 更新会话 ID
+      if (data.sessionId) {
+        setSessionId(data.sessionId);
+      }
+
+      // 构建结果对象
+      const result = {
+        id: `qa-${Date.now()}`,
+        question: question,
+        answer: data.answer || '抱歉，我无法回答这个问题。',
+        relatedGeneration: 'all', // 可以根据实际情况从 API 返回中提取
+        relatedKeywords: [], // 可以根据实际情况从 API 返回中提取
+        followups: [], // 可以根据实际情况从 API 返回中提取
+        timestamp: new Date().toISOString(),
+      };
+
+      setAnswer(data.answer);
+      setActiveResult(result);
+      setHistory(prev => [result, ...prev.slice(0, 9)]);
+      setStatus('answered');
+    } catch (error) {
+      console.error('问答失败:', error);
+      setStatus('failed');
+    }
+  };
+
+  const renderStatusIndicator = () => {
+    switch (status) {
+      case 'thinking': return React.createElement('div', { className: "text-center space-y-3" },
+        React.createElement('div', { className: "relative w-16 h-16 mx-auto" },
+          React.createElement('div', { className: "absolute inset-0 border-4 border-white/5 border-t-white/40 rounded-full animate-spin" }),
+          React.createElement(Icons.Sparkles, { size: 24, className: "text-white/80 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" })
+        ),
+        React.createElement('p', { className: "text-white/20 font-mono text-xs uppercase tracking-widest animate-pulse" }, '正在分析问题...')
+      );
+      case 'answered': return null; // 回答状态由主界面显示
+      case 'failed': return React.createElement('div', { className: "text-center" },
+        React.createElement('p', { className: "text-red-400 text-sm" }, '问答失败'),
+        React.createElement('p', { className: "text-white/40 text-xs mt-2" }, '请稍后重试')
+      );
+      default: return React.createElement('div', { className: "text-center opacity-70" },
+        React.createElement(Icons.Sparkles, { size: 64, className: "text-white mx-auto mb-3" }),
+        React.createElement('p', { className: "text-white text-sm font-medium" }, '欢迎使用木基材料综合问答助手'),
+        React.createElement('p', { className: "text-white/40 text-xs mt-2" }, '请输入问题，系统将结合当前项目内容为你提供结构化回答')
+      );
+    }
+  };
+
+  return React.createElement('div', { className: "duration-500" },
+    React.createElement('div', { className: "grid grid-cols-1 lg:grid-cols-12 gap-10" },
+      // Left Control Panel - 提问控制区
+      React.createElement('div', { className: "lg:col-span-4 space-y-6" },
+        React.createElement('div', null,
+          React.createElement('div', { className: "inline-flex px-3 py-1 bg-slate-900 text-white rounded-full text-xs font-semibold uppercase tracking-tight mb-3" },
+            "AI KNOWLEDGE ASSISTANT"
+          ),
+          React.createElement('h2', { className: "text-2xl font-bold text-slate-900 leading-tight" }, "木基材料综合问答助手"),
+          React.createElement('p', { className: "text-sm text-slate-500 mt-1" }, "基于项目知识内容的多代材料智能分析与解释系统")
+        ),
+
+        // 提问输入区
+        React.createElement('div', { className: "bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-5" },
+          // 多行输入框
+          React.createElement('div', { className: "space-y-2" },
+            React.createElement('label', { className: "text-xs font-semibold text-slate-500 uppercase tracking-wide" }, '输入问题'),
+            React.createElement('textarea', {
+              placeholder: '请输入你的问题，例如：\n- 二代为什么适合柔性电子？\n- 三代防伪原理是什么？\n- 这张图表示什么工艺？',
+              className: 'w-full px-4 py-3 border border-slate-200 rounded-lg text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-500',
+              rows: 4,
+              value: question,
+              onChange: e => setQuestion(e.target.value)
+            })
+          ),
+          
+          // 推荐问题
+          React.createElement('div', { className: "space-y-2" },
+            React.createElement('p', { className: "text-xs font-semibold text-slate-500 uppercase tracking-wide" }, '推荐问题'),
+            React.createElement('div', { className: "flex flex-wrap gap-2" },
+              RECOMMENDED_QUESTIONS.map((q, i) => (
+                React.createElement('button', {
+                  key: i,
+                  onClick: () => setQuestion(q),
+                  className: "px-3 py-1.5 bg-slate-100 rounded-full text-xs font-medium text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                }, q)
+              ))
+            )
+          ),
+          
+          // 问题分类
+          React.createElement('div', { className: "space-y-2" },
+            React.createElement('p', { className: "text-xs font-semibold text-slate-500 uppercase tracking-wide" }, '提问方向'),
+            React.createElement('div', { className: "grid grid-cols-2 gap-2" },
+              QUESTION_CATEGORIES.map((category, i) => (
+                React.createElement('button', {
+                  key: i,
+                  onClick: () => setSelectedCategory(category),
+                  className: `py-2 px-3 rounded-lg text-xs font-medium transition-all ${selectedCategory === category ? 'bg-slate-900 text-white border border-slate-900' : 'border border-slate-200 text-slate-500 hover:border-slate-900 hover:text-slate-900'}` }, category)
+                )
+              )
+            )
+          ),
+          
+          // 提问按钮
+          React.createElement('button', {
+            onClick: handleAskQuestion,
+            disabled: status === 'thinking' || !question.trim(),
+            className: 'w-full py-3.5 bg-slate-900 text-white rounded-xl text-xs font-semibold uppercase tracking-wide hover:bg-slate-800 transition-all flex items-center justify-center gap-2 disabled:opacity-50'
+          },
+            status === 'thinking' ? React.createElement(Icons.Loader2, { className: 'animate-spin' }) : React.createElement(Icons.Zap, { fill: 'white' }),
+            React.createElement('span', null, status === 'thinking' ? '正在分析...' : '获取回答')
+          )
+        ),
+
+        // 历史提问
+        React.createElement('div', null,
+          React.createElement('div', { className: "flex justify-between items-center mb-3" },
+            React.createElement('p', { className: "text-xs font-semibold text-slate-500 uppercase tracking-wide" }, '历史提问'),
+            React.createElement('span', { className: "text-xs text-slate-400" }, `${history.length} 条`)
+          ),
+          React.createElement('div', { className: "space-y-2" },
+            history.map((item, i) => (
+              React.createElement('div', {
+                key: item.id,
+                onClick: () => setActiveResult(item),
+                className: `p-3 bg-white rounded-lg border border-slate-200 hover:border-blue-300 cursor-pointer transition-all ${activeResult?.id === item.id ? 'border-2 border-blue-500 bg-blue-50' : ''}` },
+                React.createElement('p', { className: "text-xs font-medium text-slate-900 truncate" }, item.question),
+                React.createElement('p', { className: "text-xs text-slate-400 mt-1" }, `回答于 ${new Date(item.timestamp).toLocaleTimeString()}`)
+              )
+            )),
+            history.length === 0 && React.createElement('div', { className: "p-4 text-center text-slate-400 text-xs" },
+              '暂无历史提问记录'
+            )
+          )
+        )
+      ),
+
+      // Right Canvas Area - 回答展示区
+      React.createElement('div', { className: "lg:col-span-8" },
+        React.createElement('div', { className: "bg-slate-900 rounded-3xl p-2 h-full min-h-[500px] shadow-2xl relative overflow-hidden" },
+          React.createElement('div', { className: "absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.05),transparent)] pointer-events-none" }),
+          React.createElement('div', { className: "h-full w-full rounded-[1.7rem] border border-white/10 flex flex-col" },
+            React.createElement('div', { className: "p-6 flex justify-between items-center text-white/40" },
+              React.createElement('div', { className: "flex items-center gap-2" },
+                React.createElement('div', { className: "w-2 h-2 rounded-full bg-green-500 animate-pulse" }),
+                React.createElement('span', { className: "text-xs font-mono uppercase tracking-widest" }, `SYSTEM_ACTIVE: V4.0.2`)
+              ),
+              React.createElement('div', { className: "flex items-center gap-2" },
+                React.createElement('span', { className: "text-xs font-mono uppercase tracking-wide" }, `AGENT_MODE: KNOWLEDGE_QA`),
+                React.createElement('button', { className: "hover:text-white transition-colors" }, React.createElement(Icons.Maximize2, null))
+              )
+            ),
+            React.createElement('div', { className: "flex-1 flex items-center justify-center p-8 relative" },
+              React.createElement('div', { className: "w-full h-full bg-white/5 rounded-xl border border-white/10 flex flex-col items-center justify-center" },
+                activeResult && status === 'answered' ? (
+                  React.createElement(React.Fragment, null,
+                    React.createElement('div', { className: "w-full max-w-2xl mx-auto" },
+                      // 问题显示
+                      React.createElement('div', { className: "mb-6" },
+                        React.createElement('p', { className: "text-white/60 text-xs font-semibold uppercase tracking-wide mb-2" }, '你的问题'),
+                        React.createElement('p', { className: "text-white text-base" }, activeResult.question)
+                      ),
+                      // 回答显示
+                      React.createElement('div', { className: "bg-white/10 backdrop-blur-sm rounded-lg p-6 shadow-lg" },
+                        React.createElement('p', { className: "text-white/60 text-xs font-semibold uppercase tracking-wide mb-3" }, '回答结果'),
+                        React.createElement('pre', { className: "text-white text-sm whitespace-pre-wrap" }, activeResult.answer)
+                      ),
+                      // 相关信息
+                      (activeResult.relatedKeywords.length > 0 || activeResult.followups.length > 0) && React.createElement('div', { className: "mt-6 space-y-4" },
+                        activeResult.relatedKeywords.length > 0 && React.createElement('div', {
+                          className: "bg-white/5 rounded-lg p-4"
+                        },
+                          React.createElement('p', { className: "text-white/60 text-xs font-semibold uppercase tracking-wide mb-2" }, '相关关键词'),
+                          React.createElement('div', { className: "flex flex-wrap gap-2" },
+                            activeResult.relatedKeywords.map((keyword, i) => (
+                              React.createElement('span', { key: i, className: "px-2 py-1 bg-white/10 rounded-full text-xs text-white" }, keyword)
+                            ))
+                          )
+                        ),
+                        activeResult.followups.length > 0 && React.createElement('div', {
+                          className: "bg-white/5 rounded-lg p-4"
+                        },
+                          React.createElement('p', { className: "text-white/60 text-xs font-semibold uppercase tracking-wide mb-2" }, '推荐继续追问'),
+                          React.createElement('div', { className: "space-y-2" },
+                            activeResult.followups.map((followup, i) => (
+                              React.createElement('button', {
+                                key: i,
+                                onClick: () => setQuestion(followup),
+                                className: "w-full text-left px-3 py-2 bg-white/10 rounded-lg text-xs text-white hover:bg-white/20 transition-colors"
+                              }, followup)
+                            ))
+                          )
+                        )
+                      )
+                    )
+                  )
+                ) : (
+                  renderStatusIndicator()
+                )
+              )
+            ),
+            React.createElement('div', { className: "p-6 text-white/20 text-xs font-mono uppercase text-center tracking-tight flex justify-between" },
+              React.createElement('span', null, `MODE: 综合问答`),
+              React.createElement('span', null, status === 'idle' ? 'IDLE' : status === 'thinking' ? 'THINKING' : status === 'answered' ? 'ANSWERED' : 'FAILED')
+            )
+          )
+        )
+      )
+    )
+  );
+};
+
+/* ============================================
+   CONTENT PAGE
+   Main content renderer for gen1, gen2, gen3
+   ============================================ */
+const ContentPage = ({ data }) => {
+  const [showReportMenu, setShowReportMenu] = React.useState(false);
+  const { theme, hero, sections, title, keywords } = data;
+  const themeClass = `${theme.text} ${theme.bg} ${theme.border}`;
+
+  return React.createElement('div', { className: "duration-500" },
+    // Hero Section
+    React.createElement('div', { className: "mb-16 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center" },
+      React.createElement('div', { className: "lg:col-span-5 space-y-6 content-card" },
+        React.createElement('div', { className: `inline-flex px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wide border ${themeClass}` },
+          hero.subtitle
+        ),
+        React.createElement('h1', { className: "text-3xl lg:text-4xl font-bold text-slate-900 leading-tight text-shadow-sm" }, hero.title),
+        React.createElement('p', { className: "text-slate-600 text-base leading-relaxed max-w-lg" }, hero.description),
+        React.createElement('div', { className: "flex items-center gap-3 pt-2" },
+          React.createElement('div', { className: "relative" },
+            React.createElement('button', {
+              className: "px-5 py-2.5 bg-slate-900 text-white rounded-xl text-sm font-medium hover:shadow-lg transition-all flex items-center gap-2 hover-lift",
+              onClick: () => setShowReportMenu(!showReportMenu)
+            },
+              "查看研究报告",
+              React.createElement(Icons.ChevronDown, { size: 16 })
+            ),
+            showReportMenu && React.createElement('div', { className: "absolute top-full left-0 mt-2 w-80 bg-white rounded-xl shadow-xl border border-slate-200 z-50" },
+              React.createElement('div', { className: "p-3 border-b border-slate-100" },
+                React.createElement('h3', { className: "text-sm font-semibold text-slate-900" }, '选择研究报告')
+              ),
+              React.createElement('div', { className: "py-1" },
+                RESEARCH_PAPERS.map(paper => (
+                  React.createElement('a', {
+                    key: paper.id,
+                    href: paper.file,
+                    target: '_blank',
+                    rel: 'noopener noreferrer',
+                    className: "flex items-center justify-between px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 transition-colors group" },
+                    React.createElement('span', null, paper.title),
+                    React.createElement(Icons.ExternalLink, { size: 14, className: "text-slate-300 group-hover:text-slate-500" })
+                  )
+                ))
+              )
+            )
+          ),
+          React.createElement('button', { className: "p-2.5 bg-white border border-slate-200 rounded-xl text-slate-500 hover:text-slate-700 hover:border-slate-300 transition-all hover-lift" },
+            React.createElement(Icons.Share2, { size: 18 })
+          )
+        )
+      ),
+      React.createElement('div', { className: "lg:col-span-7 overflow-x-auto pb-4" },
+        React.createElement('div', { className: "flex gap-4 min-w-max" },
+          hero.images.map((image, index) => (
+            React.createElement(SmartImage, {
+              key: index,
+              ...image,
+              tag: image.tag || hero.tag,
+              ratio: image.ratio || 'auto',
+              className: "h-[400px] shadow-md"
+            })
+          ))
+        )
+      )
+    ),
+
+    // Dynamic Sections
+    sections.map((section, idx) => (
+      React.createElement('div', { className: "content-card mb-16" },
+        React.createElement(SectionRenderer, { key: section.id || idx, section })
+      )
+    ))
+  );
+};
+
+/* ============================================
+   MAIN APP
+   ============================================ */
+function App() {
+  const [activeTab, setActiveTab] = React.useState('gen1');
+  const [isSearchOpen, setIsSearchOpen] = React.useState(false);
+
+  return React.createElement('div', { className: "min-h-screen font-sans antialiased text-slate-900 overflow-x-hidden" },
+    // Header
+    React.createElement('header', { className: "fixed top-0 left-0 right-0 z-50 h-16 px-6 md:px-8 flex items-center justify-between bg-white/90 backdrop-blur-xl border-b border-slate-200 shadow-sm" },
+      React.createElement('div', { className: "flex items-center gap-3 cursor-pointer group hover-lift", onClick: () => setActiveTab('gen1') },
+        React.createElement('div', { className: "w-10 h-10 rounded-xl flex items-center justify-center transition-transform group-hover:rotate-12 overflow-hidden bg-white shadow-sm" },
+          React.createElement('img', { src: "fig/logo.png", alt: "万木更生", className: "w-full h-full object-contain" })
+        ),
+        React.createElement('div', null,
+          React.createElement('h1', { className: "text-sm font-semibold uppercase tracking-tight text-slate-900" }, "Bio-Lignin Lab"),
+          React.createElement('span', { className: "text-xs text-slate-400 font-medium uppercase tracking-widest" }, "Innovating Green Future")
+        )
+      ),
+      React.createElement('nav', { className: "hidden lg:flex items-center gap-1 bg-slate-100/80 p-1 rounded-xl" },
+        Object.keys(PAGE_CONFIG).concat('gen4').map(key => (
+          React.createElement('button', {
+            key: key,
+            onClick: () => setActiveTab(key),
+            className: `px-5 py-2 rounded-lg text-base font-semibold uppercase tracking-wide transition-all ${activeTab === key ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}` },
+            key === 'gen4' ? 'AI 定制' : `第 ${key.slice(-1)} 代`
+          )
+        ))
+      ),
+      React.createElement('div', { className: "flex items-center gap-3" },
+        React.createElement('button', {
+          onClick: () => setIsSearchOpen(true),
+          className: "flex items-center gap-2 px-5 py-2.5 bg-slate-100/80 border border-slate-200 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-slate-200/80 transition-all hover-lift" },
+          React.createElement(Icons.Search, { size: 18 }),
+          React.createElement('span', { className: "text-sm font-medium uppercase tracking-wide hidden md:inline" }, "搜索文档")
+        )
+      )
+    ),
+
+    // Main Content
+    React.createElement('main', { className: "pt-28 pb-16 px-4 md:px-8 lg:px-12 max-w-7xl mx-auto" },
+      activeTab === 'gen4' ? React.createElement(Gen4Page, null) : React.createElement(ContentPage, { data: PAGE_CONFIG[activeTab] })
+    ),
+
+    // Footer
+    React.createElement('footer', { className: "py-12 border-t border-slate-200 px-6 md:px-8 mt-8" },
+      React.createElement('div', { className: "max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center text-slate-400" },
+        React.createElement('div', { className: "flex items-center gap-2" },
+          React.createElement('img', { src: "fig/logo.png", alt: "万木更生", className: "w-7 h-7 object-contain" }),
+          React.createElement('span', { className: "text-sm font-semibold uppercase tracking-wide" }, "万木更生 · 2026"),
+        ),
+        React.createElement('div', { className: "text-sm font-medium uppercase tracking-wide flex gap-6 mt-4 md:mt-0" },
+          React.createElement('span', { className: "hover:text-slate-900 cursor-pointer transition-colors" }, "Science Advances"),
+          React.createElement('span', { className: "hover:text-slate-900 cursor-pointer transition-colors" }, "ACS Sustainable"),
+          React.createElement('span', { className: "hover:text-slate-900 cursor-pointer transition-colors" }, "Patent-CN119188923A")
+        )
+      )
+    ),
+
+    // Search Overlay
+    React.createElement(SearchOverlay, { isOpen: isSearchOpen, onClose: () => setIsSearchOpen(false) })
+  );
+}
+
+// Mount App
+ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App, null));
+  </script>
+</body>
+</html>
