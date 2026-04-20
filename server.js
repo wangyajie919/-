@@ -31,9 +31,15 @@ app.use((req, res, next) => {
 });
 
 // 静态文件服务 - 暴露根目录以确保所有相对路径都能正确解析
-// 注意：在生产环境中应该只暴露必要的目录
 console.log(`[DEBUG] Exposing root directory: ${__dirname}`);
 app.use(express.static(__dirname));
+
+// 专门处理 ppt网页图/ppt网页图 路径的静态文件服务
+const doublePptPath = path.join(__dirname, 'ppt网页图', 'ppt网页图');
+if (fs.existsSync(doublePptPath)) {
+  console.log(`[DEBUG] Exposing double ppt directory: ${doublePptPath}`);
+  app.use('/ppt网页图/ppt网页图', express.static(doublePptPath));
+}
 
 // 为每个静态目录创建路由（作为备用）
 const staticDirs = {
@@ -45,7 +51,6 @@ const staticDirs = {
 Object.entries(staticDirs).forEach(([route, dirPath]) => {
   if (fs.existsSync(dirPath)) {
     console.log(`[DEBUG] Static directory ${route} mapped to ${dirPath}`);
-    // 使用更简单的配置，确保中文路径能正确处理
     app.use(`/${route}`, express.static(dirPath));
   } else {
     console.log(`[DEBUG] Static directory ${route} not found at ${dirPath}`);
