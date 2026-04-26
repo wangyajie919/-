@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: wood-materials-ai
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: BAILIAN_APP_ID
+        value: 6dee8dd910da46cca970195b5934da51
+      - key: PORT
+        value: "10000"
+      - key: DASHSCOPE_API_KEY
+        sync: false
