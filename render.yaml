@@ -1,7 +1,7 @@
 services:
   - type: web
     name: wood-materials-ai
-    env: node
+    runtime: node
     plan: free
     buildCommand: npm install
     startCommand: node server.js
@@ -10,3 +10,5 @@ services:
         value: 6dee8dd910da46cca970195b5934da51
       - key: PORT
         value: "10000"
+      - key: DASHSCOPE_API_KEY
+        sync: false
